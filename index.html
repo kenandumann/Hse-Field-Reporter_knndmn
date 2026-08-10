@@ -3,13 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#102a43">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="HSE Field Reporter">
-<link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-192.png">
 <title>HSE Field Reporter</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#18212b;--muted:#687482;--line:#dfe5ea;--primary:#0b5cab;--danger:#c62828;--warn:#d98b00;--ok:#218739}
@@ -41,7 +34,9 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size
 <body>
 <header>
   <div><h1>HSE FIELD REPORTER</h1><small>Observation • Near Miss • Incident • Action Tracking</small></div>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><select id="languageSelect" aria-label="Language" style="width:auto;min-width:145px;padding:8px;border-radius:7px;border:1px solid #8da0b3"><option value="tr">🇹🇷 Türkçe</option><option value="en">🇬🇧 English</option><option value="ru">🇷🇺 Русский</option><option value="ar">🇸🇦 العربية</option></select><div id="today"></div></div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><select id="languageSelect" aria-label="Language" style="width:auto;min-width:145px;padding:8px;border-radius:7px;border:1px solid #8da0b3"><option value="tr">🇹🇷 Türkçe</option><option value="en">🇬🇧 English</option><option value="ru">🇷🇺 Русский</option><option value="ar">🇸🇦 العربية</option></select><div style="display:flex;align-items:center;gap:10px"><select id="languageSelect" aria-label="Language" style="padding:8px;border-radius:7px;border:1px solid #cfd7df">
+<option value="en">English</option><option value="tr">Türkçe</option><option value="ru">Русский</option><option value="ar">العربية</option>
+</select><div id="today"></div></div></div>
 </header>
 <nav>
   <button class="active" data-view="dashboard">Dashboard</button>
@@ -52,19 +47,19 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size
 
 <main>
 <section id="dashboard" class="view active">
-  <h2>HSE Dashboard</h2>
+  <h2 data-i18n="dashTitle">HSE Dashboard</h2>
   <div class="grid">
-    <div class="card"><div class="muted">Total Reports</div><div class="kpi" id="kTotal">0</div></div>
-    <div class="card"><div class="muted">Near Miss</div><div class="kpi" id="kNear">0</div></div>
-    <div class="card"><div class="muted">Incidents</div><div class="kpi" id="kInc">0</div></div>
-    <div class="card"><div class="muted">Open Actions</div><div class="kpi" id="kOpen">0</div></div>
+    <div class="card"><div class="muted" data-i18n="total">Total Reports</div><div class="kpi" id="kTotal">0</div></div>
+    <div class="card"><div class="muted" data-i18n="near">Near Miss</div><div class="kpi" id="kNear">0</div></div>
+    <div class="card"><div class="muted" data-i18n="incidents">Incidents</div><div class="kpi" id="kInc">0</div></div>
+    <div class="card"><div class="muted" data-i18n="open">Open Actions</div><div class="kpi" id="kOpen">0</div></div>
   </div>
-  <h3 class="section-title">Recent Reports</h3>
+  <h3 class="section-title" data-i18n="recent">Recent Reports</h3>
   <div id="recent"></div>
 </section>
 
 <section id="new" class="view">
-  <h2>Create HSE Report</h2>
+  <h2 data-i18n="create">Create HSE Report</h2>
   <div class="notice">This first version works offline in your browser. Photos are stored locally on this device.</div>
   <form id="reportForm" class="card">
     <div class="grid">
@@ -101,7 +96,7 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size
 </section>
 
 <section id="reports" class="view">
-  <h2>Reports</h2>
+  <h2 data-i18n="reports">Reports</h2>
   <div class="card">
     <div class="grid">
       <div><label>Search</label><input id="search" placeholder="Report no, location, description..."></div>
@@ -113,7 +108,7 @@ th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size
 </section>
 
 <section id="actions" class="view">
-  <h2>Corrective Action Tracking</h2>
+  <h2 data-i18n="actionTitle">Corrective Action Tracking</h2>
   <div class="table-wrap"><table><thead><tr><th>Report</th><th>Action</th><th>Responsible</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody id="actionRows"></tbody></table></div>
 </section>
 </main>
@@ -186,6 +181,128 @@ if ("serviceWorker" in navigator) {
   });
 }
 </script>
+
+<script>
+const I18N = {
+  tr:{
+    title:"HSE SAHA RAPORLAMA", sub:"Gözlem • Ucuz Atlatma • Olay • Aksiyon Takibi",
+    dashboard:"Ana Sayfa", new:"Yeni Rapor", reports:"Raporlar", actions:"Aksiyonlar",
+    dashTitle:"HSE Dashboard", total:"Toplam Rapor", near:"Ucuz Atlatma", incidents:"Olaylar", open:"Açık Aksiyonlar",
+    recent:"Son Raporlar", noReports:"Henüz rapor yok.",
+    create:"HSE Raporu Oluştur", notice:"Bu ilk sürüm tarayıcıda çevrimdışı çalışır. Fotoğraflar bu cihazda yerel olarak saklanır.",
+    type:"Rapor Türü *", date:"Tarih *", time:"Saat", project:"Proje / Saha", location:"Lokasyon",
+    company:"Şirket / Yüklenici", reporter:"Raporlayan", category:"Kategori *",
+    observed:"Ne gözlemlendi / ne oldu? *", consequence:"Olası Sonuç", likelihood:"Olasılık (1–5)",
+    severity:"Şiddet (1–5)", immediate:"Alınan Acil Önlem", corrective:"Düzeltici Faaliyet",
+    responsible:"Sorumlu Kişi", due:"Termin Tarihi", photos:"Fotoğraflar",
+    save:"Raporu Kaydet", clear:"Temizle", search:"Arama", all:"Tümü", status:"Durum",
+    reportTable:"No.", risk:"Risk", view:"Görüntüle", close:"Kapat", reopen:"Yeniden Aç",
+    noMatch:"Eşleşen rapor yok.", actionTitle:"Düzeltici Faaliyet Takibi",
+    action:"Aksiyon", noActions:"Düzeltici faaliyet yok.", riskScore:"Risk Skoru",
+    low:"Düşük", medium:"Orta", high:"Yüksek", extreme:"Çok Yüksek",
+    saved:"Rapor kaydedildi: ", noLocation:"Lokasyon yok", desc:"Açıklama",
+    immediateBox:"Acil Önlem", responsibleLabel:"Sorumlu:", dueLabel:"Termin:",
+    report:"Rapor", photosNone:"Fotoğraf eklenmemiş."
+  },
+  en:{
+    title:"HSE FIELD REPORTER", sub:"Observation • Near Miss • Incident • Action Tracking",
+    dashboard:"Dashboard", new:"New Report", reports:"Reports", actions:"Actions",
+    dashTitle:"HSE Dashboard", total:"Total Reports", near:"Near Miss", incidents:"Incidents", open:"Open Actions",
+    recent:"Recent Reports", noReports:"No reports yet.",
+    create:"Create HSE Report", notice:"This first version works offline in your browser. Photos are stored locally on this device.",
+    type:"Report Type *", date:"Date *", time:"Time", project:"Project / Site", location:"Location",
+    company:"Company / Contractor", reporter:"Reporter", category:"Category *",
+    observed:"What was observed / what happened? *", consequence:"Potential Consequence", likelihood:"Likelihood (1–5)",
+    severity:"Severity (1–5)", immediate:"Immediate Action Taken", corrective:"Corrective Action",
+    responsible:"Responsible Person", due:"Due Date", photos:"Photos",
+    save:"Save Report", clear:"Clear", search:"Search", all:"All", status:"Status",
+    reportTable:"No.", risk:"Risk", view:"View", close:"Close", reopen:"Reopen",
+    noMatch:"No matching reports.", actionTitle:"Corrective Action Tracking",
+    action:"Action", noActions:"No corrective actions.", riskScore:"Risk Score",
+    low:"Low", medium:"Medium", high:"High", extreme:"Extreme",
+    saved:"Report saved: ", noLocation:"No location", desc:"Description",
+    immediateBox:"Immediate Action", responsibleLabel:"Responsible:", dueLabel:"Due:",
+    report:"Report", photosNone:"No photos attached."
+  },
+  ru:{
+    title:"HSE ПОЛЕВОЙ ОТЧЕТ", sub:"Наблюдение • Почти происшествие • Инцидент • Контроль действий",
+    dashboard:"Панель", new:"Новый отчет", reports:"Отчеты", actions:"Действия",
+    dashTitle:"Панель HSE", total:"Всего отчетов", near:"Почти происшествие", incidents:"Инциденты", open:"Открытые действия",
+    recent:"Последние отчеты", noReports:"Отчетов пока нет.",
+    create:"Создать HSE отчет", notice:"Эта версия работает офлайн в браузере. Фотографии хранятся локально на устройстве.",
+    type:"Тип отчета *", date:"Дата *", time:"Время", project:"Проект / Площадка", location:"Место",
+    company:"Компания / Подрядчик", reporter:"Автор", category:"Категория *",
+    observed:"Что наблюдалось / что произошло? *", consequence:"Возможное последствие", likelihood:"Вероятность (1–5)",
+    severity:"Тяжесть (1–5)", immediate:"Принятые немедленные меры", corrective:"Корректирующее действие",
+    responsible:"Ответственный", due:"Срок", photos:"Фотографии",
+    save:"Сохранить отчет", clear:"Очистить", search:"Поиск", all:"Все", status:"Статус",
+    reportTable:"№", risk:"Риск", view:"Просмотр", close:"Закрыть", reopen:"Открыть снова",
+    noMatch:"Совпадений нет.", actionTitle:"Контроль корректирующих действий",
+    action:"Действие", noActions:"Корректирующих действий нет.", riskScore:"Оценка риска",
+    low:"Низкий", medium:"Средний", high:"Высокий", extreme:"Критический",
+    saved:"Отчет сохранен: ", noLocation:"Место не указано", desc:"Описание",
+    immediateBox:"Немедленные меры", responsibleLabel:"Ответственный:", dueLabel:"Срок:",
+    report:"Отчет", photosNone:"Фотографии не прикреплены."
+  },
+  ar:{
+    title:"تقرير السلامة والصحة والبيئة", sub:"ملاحظة • شبه حادث • حادث • متابعة الإجراءات",
+    dashboard:"لوحة التحكم", new:"تقرير جديد", reports:"التقارير", actions:"الإجراءات",
+    dashTitle:"لوحة HSE", total:"إجمالي التقارير", near:"شبه حادث", incidents:"الحوادث", open:"الإجراءات المفتوحة",
+    recent:"أحدث التقارير", noReports:"لا توجد تقارير بعد.",
+    create:"إنشاء تقرير HSE", notice:"يعمل هذا الإصدار دون اتصال في المتصفح. يتم تخزين الصور محلياً على هذا الجهاز.",
+    type:"نوع التقرير *", date:"التاريخ *", time:"الوقت", project:"المشروع / الموقع", location:"الموقع",
+    company:"الشركة / المقاول", reporter:"المُبلّغ", category:"الفئة *",
+    observed:"ماذا تمت ملاحظته / ماذا حدث؟ *", consequence:"النتيجة المحتملة", likelihood:"الاحتمالية (1–5)",
+    severity:"الخطورة (1–5)", immediate:"الإجراء الفوري المتخذ", corrective:"الإجراء التصحيحي",
+    responsible:"الشخص المسؤول", due:"تاريخ الاستحقاق", photos:"الصور",
+    save:"حفظ التقرير", clear:"مسح", search:"بحث", all:"الكل", status:"الحالة",
+    reportTable:"رقم", risk:"المخاطر", view:"عرض", close:"إغلاق", reopen:"إعادة فتح",
+    noMatch:"لا توجد تقارير مطابقة.", actionTitle:"متابعة الإجراءات التصحيحية",
+    action:"الإجراء", noActions:"لا توجد إجراءات تصحيحية.", riskScore:"درجة المخاطر",
+    low:"منخفض", medium:"متوسط", high:"عالٍ", extreme:"شديد",
+    saved:"تم حفظ التقرير: ", noLocation:"لا يوجد موقع", desc:"الوصف",
+    immediateBox:"الإجراء الفوري", responsibleLabel:"المسؤول:", dueLabel:"الاستحقاق:",
+    report:"تقرير", photosNone:"لا توجد صور مرفقة."
+  }
+};
+
+function applyLanguage(lang){
+  const t=I18N[lang]||I18N.en;
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  const map={
+    "header h1":"title","header small":"sub",
+    'button[data-view="dashboard"]':"dashboard",'button[data-view="new"]':"new",
+    'button[data-view="reports"]':"reports",'button[data-view="actions"]':"actions",
+    "#dashboard h2":"dashTitle","#kTotal":"total","#kNear":"near","#kInc":"incidents","#kOpen":"open",
+    "#dashboard h3":"recent","#new h2":"create","#new .notice":"notice",
+    "#new label:nth-of-type(1)":"type"
+  };
+  // Generic translation by data-i18n attributes.
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k=el.dataset.i18n;if(t[k])el.textContent=t[k];
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+    const k=el.dataset.i18nPlaceholder;if(t[k])el.placeholder=t[k];
+  });
+  document.querySelectorAll("[data-i18n-option]").forEach(el=>{
+    const k=el.dataset.i18nOption;if(t[k])el.textContent=t[k];
+  });
+  localStorage.setItem("hse_lang",lang);
+}
+</script>
+
+<script>
+(function(){
+ const s=document.getElementById("languageSelect");
+ if(s){
+   s.value=localStorage.getItem("hse_lang")||"en";
+   s.addEventListener("change",()=>applyLanguage(s.value));
+   applyLanguage(s.value);
+ }
+})();
+</script>
+
 </body></html>`);
  win.document.close();
 }
@@ -246,7 +363,251 @@ window.addEventListener('load',()=>{const s=document.getElementById('languageSel
 // Keep dynamic tables/cards translated whenever the original app rerenders them.
 const origAlert=window.alert; window.alert=function(msg){if(typeof msg==='string'&&msg.startsWith('Report saved: '))msg=L().saved+msg.slice(14);origAlert(msg)};
 // Localized detail window, replacing the original global function used by View buttons.
-window.viewReport=function(id){const x=reports.find(r=>r.id===id);if(!x)return;const l=L();const photos=x.photos?.map(p=>'<img src="'+p+'">').join('')||l.detail.none;const win=window.open('','_blank');win.document.write('<html lang="'+lang+'" dir="'+(lang==='ar'?'rtl':'ltr')+'"><head><title>'+x.id+'</title><style>body{font-family:Arial;max-width:900px;margin:30px auto;color:#18212b}h1{color:#102a43}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:7px}.photos img{width:180px;height:130px;object-fit:cover;margin:5px}</style></head><body><h1>'+l.detail.title+' '+x.id+'</h1><div class="grid"><div class="box"><b>'+l.detail.type+'</b><br>'+mapType(x.type)+'</div><div class="box"><b>'+l.detail.stat+'</b><br>'+mapStatus(x.status)+'</div><div class="box"><b>'+l.detail.dt+'</b><br>'+x.date+' '+(x.time||'')+'</div><div class="box"><b>'+l.detail.loc+'</b><br>'+esc(x.location)+'</div><div class="box"><b>'+l.detail.comp+'</b><br>'+esc(x.company)+'</div><div class="box"><b>'+l.detail.rep+'</b><br>'+esc(x.reporter)+'</div><div class="box"><b>'+l.detail.cat+'</b><br>'+mapCat(x.category)+'</div><div class="box"><b>'+l.detail.risk+'</b><br>'+x.risk+' — '+mapRisk(x.riskLabel)+'</div></div><div class="box"><b>'+l.detail.desc+'</b><p>'+esc(x.description)+'</p></div><div class="box"><b>'+l.detail.imm+'</b><p>'+esc(x.immediate)+'</p></div><div class="box"><b>'+l.detail.corr+'</b><p>'+esc(x.corrective)+'</p><b>'+l.detail.respons+'</b> '+esc(x.responsible)+' &nbsp; <b>'+l.detail.due+'</b> '+(x.due||'-')+'</div><h3>'+l.detail.photos+'</h3><div class="photos">'+photos+'</div><script>window.print()<\/script></body></html>');win.document.close();};
+window.viewReport=function(id){const x=reports.find(r=>r.id===id);if(!x)return;const l=L();const photos=x.photos?.map(p=>'<img src="'+p+'">').join('')||l.detail.none;const win=window.open('','_blank');win.document.write('<html lang="'+lang+'" dir="'+(lang==='ar'?'rtl':'ltr')+'"><head><title>'+x.id+'</title><style>body{font-family:Arial;max-width:900px;margin:30px auto;color:#18212b}h1{color:#102a43}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:7px}.photos img{width:180px;height:130px;object-fit:cover;margin:5px}</style></head><body><h1>'+l.detail.title+' '+x.id+'</h1><div class="grid"><div class="box"><b>'+l.detail.type+'</b><br>'+mapType(x.type)+'</div><div class="box"><b>'+l.detail.stat+'</b><br>'+mapStatus(x.status)+'</div><div class="box"><b>'+l.detail.dt+'</b><br>'+x.date+' '+(x.time||'')+'</div><div class="box"><b>'+l.detail.loc+'</b><br>'+esc(x.location)+'</div><div class="box"><b>'+l.detail.comp+'</b><br>'+esc(x.company)+'</div><div class="box"><b>'+l.detail.rep+'</b><br>'+esc(x.reporter)+'</div><div class="box"><b>'+l.detail.cat+'</b><br>'+mapCat(x.category)+'</div><div class="box"><b>'+l.detail.risk+'</b><br>'+x.risk+' — '+mapRisk(x.riskLabel)+'</div></div><div class="box"><b>'+l.detail.desc+'</b><p>'+esc(x.description)+'</p></div><div class="box"><b>'+l.detail.imm+'</b><p>'+esc(x.immediate)+'</p></div><div class="box"><b>'+l.detail.corr+'</b><p>'+esc(x.corrective)+'</p><b>'+l.detail.respons+'</b> '+esc(x.responsible)+' &nbsp; <b>'+l.detail.due+'</b> '+(x.due||'-')+'</div><h3>'+l.detail.photos+'</h3><div class="photos">'+photos+'</div><script>window.print()<\/script>
+<script>
+const I18N = {
+  tr:{
+    title:"HSE SAHA RAPORLAMA", sub:"Gözlem • Ucuz Atlatma • Olay • Aksiyon Takibi",
+    dashboard:"Ana Sayfa", new:"Yeni Rapor", reports:"Raporlar", actions:"Aksiyonlar",
+    dashTitle:"HSE Dashboard", total:"Toplam Rapor", near:"Ucuz Atlatma", incidents:"Olaylar", open:"Açık Aksiyonlar",
+    recent:"Son Raporlar", noReports:"Henüz rapor yok.",
+    create:"HSE Raporu Oluştur", notice:"Bu ilk sürüm tarayıcıda çevrimdışı çalışır. Fotoğraflar bu cihazda yerel olarak saklanır.",
+    type:"Rapor Türü *", date:"Tarih *", time:"Saat", project:"Proje / Saha", location:"Lokasyon",
+    company:"Şirket / Yüklenici", reporter:"Raporlayan", category:"Kategori *",
+    observed:"Ne gözlemlendi / ne oldu? *", consequence:"Olası Sonuç", likelihood:"Olasılık (1–5)",
+    severity:"Şiddet (1–5)", immediate:"Alınan Acil Önlem", corrective:"Düzeltici Faaliyet",
+    responsible:"Sorumlu Kişi", due:"Termin Tarihi", photos:"Fotoğraflar",
+    save:"Raporu Kaydet", clear:"Temizle", search:"Arama", all:"Tümü", status:"Durum",
+    reportTable:"No.", risk:"Risk", view:"Görüntüle", close:"Kapat", reopen:"Yeniden Aç",
+    noMatch:"Eşleşen rapor yok.", actionTitle:"Düzeltici Faaliyet Takibi",
+    action:"Aksiyon", noActions:"Düzeltici faaliyet yok.", riskScore:"Risk Skoru",
+    low:"Düşük", medium:"Orta", high:"Yüksek", extreme:"Çok Yüksek",
+    saved:"Rapor kaydedildi: ", noLocation:"Lokasyon yok", desc:"Açıklama",
+    immediateBox:"Acil Önlem", responsibleLabel:"Sorumlu:", dueLabel:"Termin:",
+    report:"Rapor", photosNone:"Fotoğraf eklenmemiş."
+  },
+  en:{
+    title:"HSE FIELD REPORTER", sub:"Observation • Near Miss • Incident • Action Tracking",
+    dashboard:"Dashboard", new:"New Report", reports:"Reports", actions:"Actions",
+    dashTitle:"HSE Dashboard", total:"Total Reports", near:"Near Miss", incidents:"Incidents", open:"Open Actions",
+    recent:"Recent Reports", noReports:"No reports yet.",
+    create:"Create HSE Report", notice:"This first version works offline in your browser. Photos are stored locally on this device.",
+    type:"Report Type *", date:"Date *", time:"Time", project:"Project / Site", location:"Location",
+    company:"Company / Contractor", reporter:"Reporter", category:"Category *",
+    observed:"What was observed / what happened? *", consequence:"Potential Consequence", likelihood:"Likelihood (1–5)",
+    severity:"Severity (1–5)", immediate:"Immediate Action Taken", corrective:"Corrective Action",
+    responsible:"Responsible Person", due:"Due Date", photos:"Photos",
+    save:"Save Report", clear:"Clear", search:"Search", all:"All", status:"Status",
+    reportTable:"No.", risk:"Risk", view:"View", close:"Close", reopen:"Reopen",
+    noMatch:"No matching reports.", actionTitle:"Corrective Action Tracking",
+    action:"Action", noActions:"No corrective actions.", riskScore:"Risk Score",
+    low:"Low", medium:"Medium", high:"High", extreme:"Extreme",
+    saved:"Report saved: ", noLocation:"No location", desc:"Description",
+    immediateBox:"Immediate Action", responsibleLabel:"Responsible:", dueLabel:"Due:",
+    report:"Report", photosNone:"No photos attached."
+  },
+  ru:{
+    title:"HSE ПОЛЕВОЙ ОТЧЕТ", sub:"Наблюдение • Почти происшествие • Инцидент • Контроль действий",
+    dashboard:"Панель", new:"Новый отчет", reports:"Отчеты", actions:"Действия",
+    dashTitle:"Панель HSE", total:"Всего отчетов", near:"Почти происшествие", incidents:"Инциденты", open:"Открытые действия",
+    recent:"Последние отчеты", noReports:"Отчетов пока нет.",
+    create:"Создать HSE отчет", notice:"Эта версия работает офлайн в браузере. Фотографии хранятся локально на устройстве.",
+    type:"Тип отчета *", date:"Дата *", time:"Время", project:"Проект / Площадка", location:"Место",
+    company:"Компания / Подрядчик", reporter:"Автор", category:"Категория *",
+    observed:"Что наблюдалось / что произошло? *", consequence:"Возможное последствие", likelihood:"Вероятность (1–5)",
+    severity:"Тяжесть (1–5)", immediate:"Принятые немедленные меры", corrective:"Корректирующее действие",
+    responsible:"Ответственный", due:"Срок", photos:"Фотографии",
+    save:"Сохранить отчет", clear:"Очистить", search:"Поиск", all:"Все", status:"Статус",
+    reportTable:"№", risk:"Риск", view:"Просмотр", close:"Закрыть", reopen:"Открыть снова",
+    noMatch:"Совпадений нет.", actionTitle:"Контроль корректирующих действий",
+    action:"Действие", noActions:"Корректирующих действий нет.", riskScore:"Оценка риска",
+    low:"Низкий", medium:"Средний", high:"Высокий", extreme:"Критический",
+    saved:"Отчет сохранен: ", noLocation:"Место не указано", desc:"Описание",
+    immediateBox:"Немедленные меры", responsibleLabel:"Ответственный:", dueLabel:"Срок:",
+    report:"Отчет", photosNone:"Фотографии не прикреплены."
+  },
+  ar:{
+    title:"تقرير السلامة والصحة والبيئة", sub:"ملاحظة • شبه حادث • حادث • متابعة الإجراءات",
+    dashboard:"لوحة التحكم", new:"تقرير جديد", reports:"التقارير", actions:"الإجراءات",
+    dashTitle:"لوحة HSE", total:"إجمالي التقارير", near:"شبه حادث", incidents:"الحوادث", open:"الإجراءات المفتوحة",
+    recent:"أحدث التقارير", noReports:"لا توجد تقارير بعد.",
+    create:"إنشاء تقرير HSE", notice:"يعمل هذا الإصدار دون اتصال في المتصفح. يتم تخزين الصور محلياً على هذا الجهاز.",
+    type:"نوع التقرير *", date:"التاريخ *", time:"الوقت", project:"المشروع / الموقع", location:"الموقع",
+    company:"الشركة / المقاول", reporter:"المُبلّغ", category:"الفئة *",
+    observed:"ماذا تمت ملاحظته / ماذا حدث؟ *", consequence:"النتيجة المحتملة", likelihood:"الاحتمالية (1–5)",
+    severity:"الخطورة (1–5)", immediate:"الإجراء الفوري المتخذ", corrective:"الإجراء التصحيحي",
+    responsible:"الشخص المسؤول", due:"تاريخ الاستحقاق", photos:"الصور",
+    save:"حفظ التقرير", clear:"مسح", search:"بحث", all:"الكل", status:"الحالة",
+    reportTable:"رقم", risk:"المخاطر", view:"عرض", close:"إغلاق", reopen:"إعادة فتح",
+    noMatch:"لا توجد تقارير مطابقة.", actionTitle:"متابعة الإجراءات التصحيحية",
+    action:"الإجراء", noActions:"لا توجد إجراءات تصحيحية.", riskScore:"درجة المخاطر",
+    low:"منخفض", medium:"متوسط", high:"عالٍ", extreme:"شديد",
+    saved:"تم حفظ التقرير: ", noLocation:"لا يوجد موقع", desc:"الوصف",
+    immediateBox:"الإجراء الفوري", responsibleLabel:"المسؤول:", dueLabel:"الاستحقاق:",
+    report:"تقرير", photosNone:"لا توجد صور مرفقة."
+  }
+};
+
+function applyLanguage(lang){
+  const t=I18N[lang]||I18N.en;
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  const map={
+    "header h1":"title","header small":"sub",
+    'button[data-view="dashboard"]':"dashboard",'button[data-view="new"]':"new",
+    'button[data-view="reports"]':"reports",'button[data-view="actions"]':"actions",
+    "#dashboard h2":"dashTitle","#kTotal":"total","#kNear":"near","#kInc":"incidents","#kOpen":"open",
+    "#dashboard h3":"recent","#new h2":"create","#new .notice":"notice",
+    "#new label:nth-of-type(1)":"type"
+  };
+  // Generic translation by data-i18n attributes.
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k=el.dataset.i18n;if(t[k])el.textContent=t[k];
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+    const k=el.dataset.i18nPlaceholder;if(t[k])el.placeholder=t[k];
+  });
+  document.querySelectorAll("[data-i18n-option]").forEach(el=>{
+    const k=el.dataset.i18nOption;if(t[k])el.textContent=t[k];
+  });
+  localStorage.setItem("hse_lang",lang);
+}
+</script>
+
+<script>
+(function(){
+ const s=document.getElementById("languageSelect");
+ if(s){
+   s.value=localStorage.getItem("hse_lang")||"en";
+   s.addEventListener("change",()=>applyLanguage(s.value));
+   applyLanguage(s.value);
+ }
 })();
 </script>
+
+</body></html>');win.document.close();};
+})();
+</script>
+
+<script>
+const I18N = {
+  tr:{
+    title:"HSE SAHA RAPORLAMA", sub:"Gözlem • Ucuz Atlatma • Olay • Aksiyon Takibi",
+    dashboard:"Ana Sayfa", new:"Yeni Rapor", reports:"Raporlar", actions:"Aksiyonlar",
+    dashTitle:"HSE Dashboard", total:"Toplam Rapor", near:"Ucuz Atlatma", incidents:"Olaylar", open:"Açık Aksiyonlar",
+    recent:"Son Raporlar", noReports:"Henüz rapor yok.",
+    create:"HSE Raporu Oluştur", notice:"Bu ilk sürüm tarayıcıda çevrimdışı çalışır. Fotoğraflar bu cihazda yerel olarak saklanır.",
+    type:"Rapor Türü *", date:"Tarih *", time:"Saat", project:"Proje / Saha", location:"Lokasyon",
+    company:"Şirket / Yüklenici", reporter:"Raporlayan", category:"Kategori *",
+    observed:"Ne gözlemlendi / ne oldu? *", consequence:"Olası Sonuç", likelihood:"Olasılık (1–5)",
+    severity:"Şiddet (1–5)", immediate:"Alınan Acil Önlem", corrective:"Düzeltici Faaliyet",
+    responsible:"Sorumlu Kişi", due:"Termin Tarihi", photos:"Fotoğraflar",
+    save:"Raporu Kaydet", clear:"Temizle", search:"Arama", all:"Tümü", status:"Durum",
+    reportTable:"No.", risk:"Risk", view:"Görüntüle", close:"Kapat", reopen:"Yeniden Aç",
+    noMatch:"Eşleşen rapor yok.", actionTitle:"Düzeltici Faaliyet Takibi",
+    action:"Aksiyon", noActions:"Düzeltici faaliyet yok.", riskScore:"Risk Skoru",
+    low:"Düşük", medium:"Orta", high:"Yüksek", extreme:"Çok Yüksek",
+    saved:"Rapor kaydedildi: ", noLocation:"Lokasyon yok", desc:"Açıklama",
+    immediateBox:"Acil Önlem", responsibleLabel:"Sorumlu:", dueLabel:"Termin:",
+    report:"Rapor", photosNone:"Fotoğraf eklenmemiş."
+  },
+  en:{
+    title:"HSE FIELD REPORTER", sub:"Observation • Near Miss • Incident • Action Tracking",
+    dashboard:"Dashboard", new:"New Report", reports:"Reports", actions:"Actions",
+    dashTitle:"HSE Dashboard", total:"Total Reports", near:"Near Miss", incidents:"Incidents", open:"Open Actions",
+    recent:"Recent Reports", noReports:"No reports yet.",
+    create:"Create HSE Report", notice:"This first version works offline in your browser. Photos are stored locally on this device.",
+    type:"Report Type *", date:"Date *", time:"Time", project:"Project / Site", location:"Location",
+    company:"Company / Contractor", reporter:"Reporter", category:"Category *",
+    observed:"What was observed / what happened? *", consequence:"Potential Consequence", likelihood:"Likelihood (1–5)",
+    severity:"Severity (1–5)", immediate:"Immediate Action Taken", corrective:"Corrective Action",
+    responsible:"Responsible Person", due:"Due Date", photos:"Photos",
+    save:"Save Report", clear:"Clear", search:"Search", all:"All", status:"Status",
+    reportTable:"No.", risk:"Risk", view:"View", close:"Close", reopen:"Reopen",
+    noMatch:"No matching reports.", actionTitle:"Corrective Action Tracking",
+    action:"Action", noActions:"No corrective actions.", riskScore:"Risk Score",
+    low:"Low", medium:"Medium", high:"High", extreme:"Extreme",
+    saved:"Report saved: ", noLocation:"No location", desc:"Description",
+    immediateBox:"Immediate Action", responsibleLabel:"Responsible:", dueLabel:"Due:",
+    report:"Report", photosNone:"No photos attached."
+  },
+  ru:{
+    title:"HSE ПОЛЕВОЙ ОТЧЕТ", sub:"Наблюдение • Почти происшествие • Инцидент • Контроль действий",
+    dashboard:"Панель", new:"Новый отчет", reports:"Отчеты", actions:"Действия",
+    dashTitle:"Панель HSE", total:"Всего отчетов", near:"Почти происшествие", incidents:"Инциденты", open:"Открытые действия",
+    recent:"Последние отчеты", noReports:"Отчетов пока нет.",
+    create:"Создать HSE отчет", notice:"Эта версия работает офлайн в браузере. Фотографии хранятся локально на устройстве.",
+    type:"Тип отчета *", date:"Дата *", time:"Время", project:"Проект / Площадка", location:"Место",
+    company:"Компания / Подрядчик", reporter:"Автор", category:"Категория *",
+    observed:"Что наблюдалось / что произошло? *", consequence:"Возможное последствие", likelihood:"Вероятность (1–5)",
+    severity:"Тяжесть (1–5)", immediate:"Принятые немедленные меры", corrective:"Корректирующее действие",
+    responsible:"Ответственный", due:"Срок", photos:"Фотографии",
+    save:"Сохранить отчет", clear:"Очистить", search:"Поиск", all:"Все", status:"Статус",
+    reportTable:"№", risk:"Риск", view:"Просмотр", close:"Закрыть", reopen:"Открыть снова",
+    noMatch:"Совпадений нет.", actionTitle:"Контроль корректирующих действий",
+    action:"Действие", noActions:"Корректирующих действий нет.", riskScore:"Оценка риска",
+    low:"Низкий", medium:"Средний", high:"Высокий", extreme:"Критический",
+    saved:"Отчет сохранен: ", noLocation:"Место не указано", desc:"Описание",
+    immediateBox:"Немедленные меры", responsibleLabel:"Ответственный:", dueLabel:"Срок:",
+    report:"Отчет", photosNone:"Фотографии не прикреплены."
+  },
+  ar:{
+    title:"تقرير السلامة والصحة والبيئة", sub:"ملاحظة • شبه حادث • حادث • متابعة الإجراءات",
+    dashboard:"لوحة التحكم", new:"تقرير جديد", reports:"التقارير", actions:"الإجراءات",
+    dashTitle:"لوحة HSE", total:"إجمالي التقارير", near:"شبه حادث", incidents:"الحوادث", open:"الإجراءات المفتوحة",
+    recent:"أحدث التقارير", noReports:"لا توجد تقارير بعد.",
+    create:"إنشاء تقرير HSE", notice:"يعمل هذا الإصدار دون اتصال في المتصفح. يتم تخزين الصور محلياً على هذا الجهاز.",
+    type:"نوع التقرير *", date:"التاريخ *", time:"الوقت", project:"المشروع / الموقع", location:"الموقع",
+    company:"الشركة / المقاول", reporter:"المُبلّغ", category:"الفئة *",
+    observed:"ماذا تمت ملاحظته / ماذا حدث؟ *", consequence:"النتيجة المحتملة", likelihood:"الاحتمالية (1–5)",
+    severity:"الخطورة (1–5)", immediate:"الإجراء الفوري المتخذ", corrective:"الإجراء التصحيحي",
+    responsible:"الشخص المسؤول", due:"تاريخ الاستحقاق", photos:"الصور",
+    save:"حفظ التقرير", clear:"مسح", search:"بحث", all:"الكل", status:"الحالة",
+    reportTable:"رقم", risk:"المخاطر", view:"عرض", close:"إغلاق", reopen:"إعادة فتح",
+    noMatch:"لا توجد تقارير مطابقة.", actionTitle:"متابعة الإجراءات التصحيحية",
+    action:"الإجراء", noActions:"لا توجد إجراءات تصحيحية.", riskScore:"درجة المخاطر",
+    low:"منخفض", medium:"متوسط", high:"عالٍ", extreme:"شديد",
+    saved:"تم حفظ التقرير: ", noLocation:"لا يوجد موقع", desc:"الوصف",
+    immediateBox:"الإجراء الفوري", responsibleLabel:"المسؤول:", dueLabel:"الاستحقاق:",
+    report:"تقرير", photosNone:"لا توجد صور مرفقة."
+  }
+};
+
+function applyLanguage(lang){
+  const t=I18N[lang]||I18N.en;
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+  const map={
+    "header h1":"title","header small":"sub",
+    'button[data-view="dashboard"]':"dashboard",'button[data-view="new"]':"new",
+    'button[data-view="reports"]':"reports",'button[data-view="actions"]':"actions",
+    "#dashboard h2":"dashTitle","#kTotal":"total","#kNear":"near","#kInc":"incidents","#kOpen":"open",
+    "#dashboard h3":"recent","#new h2":"create","#new .notice":"notice",
+    "#new label:nth-of-type(1)":"type"
+  };
+  // Generic translation by data-i18n attributes.
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k=el.dataset.i18n;if(t[k])el.textContent=t[k];
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+    const k=el.dataset.i18nPlaceholder;if(t[k])el.placeholder=t[k];
+  });
+  document.querySelectorAll("[data-i18n-option]").forEach(el=>{
+    const k=el.dataset.i18nOption;if(t[k])el.textContent=t[k];
+  });
+  localStorage.setItem("hse_lang",lang);
+}
+</script>
+
+<script>
+(function(){
+ const s=document.getElementById("languageSelect");
+ if(s){
+   s.value=localStorage.getItem("hse_lang")||"en";
+   s.addEventListener("change",()=>applyLanguage(s.value));
+   applyLanguage(s.value);
+ }
+})();
+</script>
+
 </body></html>
