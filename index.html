@@ -32,6 +32,9 @@ table{width:100%;border-collapse:collapse;background:#fff}th,td{text-align:left;
 [dir=rtl]{direction:rtl}[dir=rtl] th,[dir=rtl] td{text-align:right}
 @media(max-width:650px){header{align-items:flex-start;flex-direction:column}}
 </style>
+  <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b5ed7">
+<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 <header>
@@ -150,5 +153,17 @@ let x=reports.find(r=>r.id===id);if(!x)return;let w=window.open("","_blank");if(
 let imgs=x.photos?.map(p=>'<img src="'+p+'">').join("")||"No photos";w.document.write('<!doctype html><html lang="'+lang+'" dir="'+(lang==="ar"?"rtl":"ltr")+'"><head><meta charset="utf-8"><title>'+esc(x.id)+'</title><style>body{font-family:Arial;max-width:900px;margin:30px auto;padding:10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.box{border:1px solid #ddd;padding:12px;margin:8px 0;border-radius:7px}.photos img{width:180px;height:130px;object-fit:cover;margin:5px}</style></head><body><h1>'+T().title+" — "+esc(x.id)+'</h1><div class="grid"><div class="box"><b>'+T().type+'</b><br>'+esc(trVal(baseTypes,x.type))+'</div><div class="box"><b>'+T().status+'</b><br>'+statusName(x.status)+'</div><div class="box"><b>'+T().labels[1]+'</b><br>'+esc(x.date)+" "+esc(x.time||"")+'</div><div class="box"><b>'+T().labels[4]+'</b><br>'+esc(x.location)+'</div><div class="box"><b>'+T().labels[5]+'</b><br>'+esc(x.company)+'</div><div class="box"><b>'+T().labels[6]+'</b><br>'+esc(x.reporter)+'</div><div class="box"><b>'+T().labels[7]+'</b><br>'+esc(trVal(baseCats,x.category))+'</div><div class="box"><b>'+T().risk+'</b><br>'+x.risk+" — "+riskName(x.riskLabel)+'</div></div><div class="box"><b>'+T().labels[8]+'</b><p>'+esc(x.description)+'</p></div><div class="box"><b>'+T().labels[12]+'</b><p>'+esc(x.immediate)+'</p></div><div class="box"><b>'+T().labels[13]+'</b><p>'+esc(x.corrective)+'</p><b>'+T().labels[14]+":</b> "+esc(x.responsible)+" &nbsp; <b>"+T().labels[15]+":</b> "+esc(x.due||"-")+'</div><h3>'+T().labels[16]+'</h3><div class="photos">'+imgs+'</div><script>window.onload=function(){window.print()}<\/script></body></html>');w.document.close()
 }
 $("languageSelect").value=lang;$("languageSelect").onchange=e=>{lang=e.target.value;localStorage.setItem("hse_language",lang);localize()};localize();
+</script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(function () {
+        console.log("HSE FIELD REPORTER Service Worker registered");
+      })
+      .catch(function (error) {
+        console.log("Service Worker error:", error);
+      });
+  });
+}
 </script>
 </body></html>
