@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSE Field Reporter</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#18212b;--muted:#687482;--line:#dfe5ea;--primary:#0b5cab;--danger:#c62828;--warn:#d98b00;--ok:#218739}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:#102a43;color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+header h1{margin:0;font-size:21px}header small{opacity:.75}
+nav{background:#fff;border-bottom:1px solid var(--line);display:flex;gap:6px;padding:8px 14px;overflow:auto}
+nav button{border:0;background:transparent;padding:10px 13px;border-radius:7px;cursor:pointer;color:#425466;white-space:nowrap}
+nav button.active{background:#e8f1fb;color:var(--primary);font-weight:700}
+main{max-width:1200px;margin:22px auto;padding:0 16px}.view{display:none}.view.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:15px}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:17px;box-shadow:0 2px 8px #00000008}
+.kpi{font-size:30px;font-weight:800;margin-top:5px}.muted{color:var(--muted);font-size:13px}
+h2{margin-top:0}.section-title{margin:25px 0 10px}
+label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}input,select,textarea{width:100%;padding:10px;border:1px solid #cfd7df;border-radius:7px;background:#fff;font:inherit}textarea{min-height:105px;resize:vertical}
+button.primary,.primary{background:var(--primary);color:#fff;border:0;border-radius:7px;padding:11px 16px;font-weight:700;cursor:pointer}
+button.secondary{background:#fff;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:10px 14px;cursor:pointer}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.danger{color:var(--danger)}
+table{width:100%;border-collapse:collapse;background:#fff}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:9px}
+th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}th{background:#f8fafc}
+.badge{display:inline-block;padding:4px 8px;border-radius:99px;font-size:11px;font-weight:700;background:#edf1f4}
+.badge.open{background:#fff3cd;color:#7a5b00}.badge.closed{background:#dff3e3;color:#176c29}.badge.high{background:#fde2e2;color:#a51d1d}
+.photos{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}.photos img{width:120px;height:90px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
+.hidden{display:none}.empty{padding:35px;text-align:center;color:var(--muted)}
+.notice{padding:11px 13px;border-radius:7px;background:#eef6ff;border:1px solid #cfe4fb;color:#174a7c;margin-bottom:15px}
+.risk-box{font-size:18px;font-weight:800;padding:12px;border-radius:7px;background:#f2f4f6;margin-top:8px}
+@media(max-width:650px){header{align-items:flex-start;flex-direction:column}main{margin-top:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>HSE FIELD REPORTER</h1><small>Observation • Near Miss • Incident • Action Tracking</small></div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><select id="languageSelect" aria-label="Language" style="width:auto;min-width:145px;padding:8px;border-radius:7px;border:1px solid #8da0b3"><option value="tr">🇹🇷 Türkçe</option><option value="en">🇬🇧 English</option><option value="ru">🇷🇺 Русский</option><option value="ar">🇸🇦 العربية</option></select><div id="today"></div></div>
+</header>
+<nav>
+  <button class="active" data-view="dashboard">Dashboard</button>
+  <button data-view="new">New Report</button>
+  <button data-view="reports">Reports</button>
+  <button data-view="actions">Actions</button>
+</nav>
+
+<main>
+<section id="dashboard" class="view active">
+  <h2>HSE Dashboard</h2>
+  <div class="grid">
+    <div class="card"><div class="muted">Total Reports</div><div class="kpi" id="kTotal">0</div></div>
+    <div class="card"><div class="muted">Near Miss</div><div class="kpi" id="kNear">0</div></div>
+    <div class="card"><div class="muted">Incidents</div><div class="kpi" id="kInc">0</div></div>
+    <div class="card"><div class="muted">Open Actions</div><div class="kpi" id="kOpen">0</div></div>
+  </div>
+  <h3 class="section-title">Recent Reports</h3>
+  <div id="recent"></div>
+</section>
+
+<section id="new" class="view">
+  <h2>Create HSE Report</h2>
+  <div class="notice">This first version works offline in your browser. Photos are stored locally on this device.</div>
+  <form id="reportForm" class="card">
+    <div class="grid">
+      <div><label>Report Type *</label><select id="type" required>
+        <option>Safety Observation</option><option>Near Miss</option><option>Incident</option><option>Unsafe Act</option><option>Unsafe Condition</option><option>Positive Observation</option><option>Environmental</option><option>Hazard Report</option>
+      </select></div>
+      <div><label>Date *</label><input id="date" type="date" required></div>
+      <div><label>Time</label><input id="time" type="time"></div>
+      <div><label>Project / Site</label><input id="project" placeholder="Project name"></div>
+      <div><label>Location</label><input id="location" placeholder="Area / building / unit"></div>
+      <div><label>Company / Contractor</label><input id="company" placeholder="Company"></div>
+      <div><label>Reporter</label><input id="reporter" placeholder="Name"></div>
+      <div><label>Category *</label><select id="category" required>
+        <option>Working at Height</option><option>Lifting</option><option>Confined Space</option><option>Excavation</option><option>Electrical</option><option>Fire & Emergency</option><option>PPE</option><option>Housekeeping</option><option>Scaffolding</option><option>Tools & Equipment</option><option>Vehicle / Traffic</option><option>Permit to Work</option><option>Environment</option><option>Other</option>
+      </select></div>
+    </div>
+    <label>What was observed / what happened? *</label><textarea id="description" required placeholder="Describe the situation clearly..."></textarea>
+    <div class="grid">
+      <div><label>Potential Consequence</label><select id="consequence"><option>Minor Injury</option><option>Serious Injury</option><option>Fatality</option><option>Property Damage</option><option>Environmental Impact</option><option>No Significant Consequence</option></select></div>
+      <div><label>Likelihood (1–5)</label><select id="likelihood"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div><label>Severity (1–5)</label><select id="severity"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+      <div><label>Immediate Action Taken</label><input id="immediate" placeholder="Stop work, barricade, inform supervisor..."></div>
+    </div>
+    <div id="risk" class="risk-box">Risk Score: 1 — Low</div>
+    <label>Corrective Action</label><textarea id="corrective" placeholder="What must be done to eliminate/control the hazard?"></textarea>
+    <div class="grid">
+      <div><label>Responsible Person</label><input id="responsible"></div>
+      <div><label>Due Date</label><input id="due" type="date"></div>
+    </div>
+    <label>Photos</label><input id="photos" type="file" accept="image/*" multiple>
+    <div id="photoPreview" class="photos"></div>
+    <div class="actions"><button class="primary" type="submit">Save Report</button><button class="secondary" type="reset" id="resetBtn">Clear</button></div>
+  </form>
+</section>
+
+<section id="reports" class="view">
+  <h2>Reports</h2>
+  <div class="card">
+    <div class="grid">
+      <div><label>Search</label><input id="search" placeholder="Report no, location, description..."></div>
+      <div><label>Type</label><select id="filterType"><option value="">All</option><option>Safety Observation</option><option>Near Miss</option><option>Incident</option><option>Unsafe Act</option><option>Unsafe Condition</option><option>Positive Observation</option><option>Environmental</option><option>Hazard Report</option></select></div>
+      <div><label>Status</label><select id="filterStatus"><option value="">All</option><option>Open</option><option>Closed</option></select></div>
+    </div>
+  </div>
+  <div class="table-wrap" style="margin-top:15px"><table><thead><tr><th>No.</th><th>Date</th><th>Type</th><th>Location</th><th>Risk</th><th>Status</th><th>Actions</th></tr></thead><tbody id="reportRows"></tbody></table></div>
+</section>
+
+<section id="actions" class="view">
+  <h2>Corrective Action Tracking</h2>
+  <div class="table-wrap"><table><thead><tr><th>Report</th><th>Action</th><th>Responsible</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody id="actionRows"></tbody></table></div>
+</section>
+</main>
+
+<script>
+const KEY='kenan_hse_reports_v1';
+let reports=JSON.parse(localStorage.getItem(KEY)||'[]');
+const $=id=>document.getElementById(id);
+const today=new Date().toISOString().slice(0,10);
+$('today').textContent=today;
+$('date').value=today;
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+function showView(id){
+ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+ $(id).classList.add('active'); render();
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(reports))}
+function riskScore(){
+ const s=+$('likelihood').value*+$('severity').value;
+ const label=s>=15?'Extreme':s>=10?'High':s>=5?'Medium':'Low';
+ $('risk').textContent=`Risk Score: ${s} — ${label}`;
+ $('risk').className='risk-box '+(label==='High'||label==='Extreme'?'danger':'');
+ return {score:s,label};
+}
+$('likelihood').onchange=riskScore;$('severity').onchange=riskScore;
+
+let selectedPhotos=[];
+$('photos').onchange=e=>{
+ selectedPhotos=[];$('photoPreview').innerHTML='';
+ [...e.target.files].forEach(file=>{
+   const r=new FileReader();r.onload=ev=>{selectedPhotos.push(ev.target.result);const img=document.createElement('img');img.src=ev.target.result;$('photoPreview').appendChild(img)};r.readAsDataURL(file);
+ });
+};
+
+$('reportForm').onsubmit=e=>{
+ e.preventDefault();
+ const r=riskScore();
+ const id='HSE-'+new Date().getFullYear()+'-'+String(reports.length+1).padStart(5,'0');
+ reports.unshift({id,type:$('type').value,date:$('date').value,time:$('time').value,project:$('project').value,location:$('location').value,company:$('company').value,reporter:$('reporter').value,category:$('category').value,description:$('description').value,consequence:$('consequence').value,likelihood:+$('likelihood').value,severity:+$('severity').value,risk:r.score,riskLabel:r.label,immediate:$('immediate').value,corrective:$('corrective').value,responsible:$('responsible').value,due:$('due').value,status:'Open',photos:selectedPhotos,created:new Date().toISOString()});
+ save(); e.target.reset(); $('date').value=today; selectedPhotos=[];$('photoPreview').innerHTML=''; riskScore(); alert('Report saved: '+id); showView('reports');
+};
+
+$('resetBtn').onclick=()=>setTimeout(()=>{$('date').value=today;$('photoPreview').innerHTML='';selectedPhotos=[];riskScore()},0);
+$('search').oninput=render;$('filterType').onchange=render;$('filterStatus').onchange=render;
+
+function render(){
+ $('kTotal').textContent=reports.length;
+ $('kNear').textContent=reports.filter(x=>x.type==='Near Miss').length;
+ $('kInc').textContent=reports.filter(x=>x.type==='Incident').length;
+ $('kOpen').textContent=reports.filter(x=>x.status==='Open').length;
+ $('recent').innerHTML=reports.slice(0,5).map(rowCard).join('')||'<div class="card empty">No reports yet.</div>';
+ const q=($('search')?.value||'').toLowerCase(), ft=$('filterType')?.value||'', fs=$('filterStatus')?.value||'';
+ const list=reports.filter(x=>(!q||JSON.stringify(x).toLowerCase().includes(q))&&(!ft||x.type===ft)&&(!fs||x.status===fs));
+ $('reportRows').innerHTML=list.map(x=>`<tr><td><b>${x.id}</b></td><td>${x.date}</td><td>${x.type}</td><td>${x.location||'-'}</td><td><span class="badge ${x.risk>=10?'high':''}">${x.risk} ${x.riskLabel}</span></td><td><span class="badge ${x.status.toLowerCase()}">${x.status}</span></td><td><button class="secondary" onclick="viewReport('${x.id}')">View</button> <button class="secondary" onclick="toggleStatus('${x.id}')">${x.status==='Open'?'Close':'Reopen'}</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">No matching reports.</td></tr>';
+ const acts=reports.filter(x=>x.corrective);
+ $('actionRows').innerHTML=acts.map(x=>`<tr><td>${x.id}</td><td>${esc(x.corrective)}</td><td>${esc(x.responsible||'-')}</td><td>${x.due||'-'}</td><td><span class="badge ${x.status.toLowerCase()}">${x.status}</span></td><td><button class="secondary" onclick="toggleStatus('${x.id}')">${x.status==='Open'?'Close':'Reopen'}</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">No corrective actions.</td></tr>';
+}
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function rowCard(x){return `<div class="card" style="margin-bottom:9px"><b>${x.id}</b> — ${x.type}<div class="muted">${x.date} • ${esc(x.location||'No location')} • ${x.category}</div><p>${esc(x.description).slice(0,220)}</p><span class="badge ${x.status.toLowerCase()}">${x.status}</span> <span class="badge ${x.risk>=10?'high':''}">Risk ${x.risk}</span> <button class="secondary" onclick="viewReport('${x.id}')">View</button></div>`}
+function viewReport(id){
+ const x=reports.find(r=>r.id===id); if(!x)return;
+ const photos=x.photos?.map(p=>`<img src="${p}">`).join('')||'';
+ const win=window.open('','_blank');
+ win.document.write(`<html><head><title>${x.id}</title><style>body{font-family:Arial;max-width:900px;margin:30px auto;color:#18212b}h1{color:#102a43}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:7px}.photos img{width:180px;height:130px;object-fit:cover;margin:5px}</style></head><body><h1>HSE Report ${x.id}</h1><div class="grid"><div class="box"><b>Type</b><br>${x.type}</div><div class="box"><b>Status</b><br>${x.status}</div><div class="box"><b>Date / Time</b><br>${x.date} ${x.time||''}</div><div class="box"><b>Location</b><br>${esc(x.location)}</div><div class="box"><b>Company</b><br>${esc(x.company)}</div><div class="box"><b>Reporter</b><br>${esc(x.reporter)}</div><div class="box"><b>Category</b><br>${x.category}</div><div class="box"><b>Risk</b><br>${x.risk} — ${x.riskLabel}</div></div><div class="box"><b>Description</b><p>${esc(x.description)}</p></div><div class="box"><b>Immediate Action</b><p>${esc(x.immediate)}</p></div><div class="box"><b>Corrective Action</b><p>${esc(x.corrective)}</p><b>Responsible:</b> ${esc(x.responsible)} &nbsp; <b>Due:</b> ${x.due||'-'}</div><h3>Photos</h3><div class="photos">${photos||'No photos attached.'}</div><script>window.print()<\/script></body></html>`);
+ win.document.close();
+}
+function toggleStatus(id){const x=reports.find(r=>r.id===id);if(x){x.status=x.status==='Open'?'Closed':'Open';save();render()}}
+render();riskScore();
+</script>
+
+<script>
+(function(){
+const I={
+ en:{nav:['Dashboard','New Report','Reports','Actions'],dash:'HSE Dashboard',k:['Total Reports','Near Miss','Incidents','Open Actions'],recent:'Recent Reports',newTitle:'Create HSE Report',notice:'This first version works offline in your browser. Photos are stored locally on this device.',labels:['Report Type *','Date *','Time','Project / Site','Location','Company / Contractor','Reporter','Category *','What was observed / what happened? *','Potential Consequence','Likelihood (1–5)','Severity (1–5)','Immediate Action Taken','Corrective Action','Responsible Person','Due Date','Photos'],save:'Save Report',clear:'Clear',risk:'Risk Score',search:'Search',type:'Type',status:'Status',all:'All',view:'View',close:'Close',reopen:'Reopen',noReports:'No reports yet.',noMatch:'No matching reports.',noActions:'No corrective actions.',saved:'Report saved: ',types:['Safety Observation','Near Miss','Incident','Unsafe Act','Unsafe Condition','Positive Observation','Environmental','Hazard Report'],cats:['Working at Height','Lifting','Confined Space','Excavation','Electrical','Fire & Emergency','PPE','Housekeeping','Scaffolding','Tools & Equipment','Vehicle / Traffic','Permit to Work','Environment','Other'],cons:['Minor Injury','Serious Injury','Fatality','Property Damage','Environmental Impact','No Significant Consequence'],risk:['Low','Medium','High','Extreme'],actionTitle:'Corrective Action Tracking',headers:['No.','Date','Type','Location','Risk','Status','Actions'],actionHeaders:['Report','Action','Responsible','Due','Status',''],detail:{title:'HSE Report',type:'Type',stat:'Status',dt:'Date / Time',loc:'Location',comp:'Company',rep:'Reporter',cat:'Category',risk:'Risk',desc:'Description',imm:'Immediate Action',corr:'Corrective Action',respons:'Responsible:',due:'Due:',photos:'Photos',none:'No photos attached.'}},
+ tr:{nav:['Panel','Yeni Rapor','Raporlar','Aksiyonlar'],dash:'HSE Dashboard',k:['Toplam Rapor','Ucuz Atlatma','Olaylar','Açık Aksiyonlar'],recent:'Son Raporlar',newTitle:'HSE Raporu Oluştur',notice:'Bu ilk sürüm tarayıcınızda çevrimdışı çalışır. Fotoğraflar bu cihazda yerel olarak saklanır.',labels:['Rapor Türü *','Tarih *','Saat','Proje / Saha','Lokasyon','Firma / Alt Yüklenici','Raporlayan','Kategori *','Ne gözlemlendi / ne oldu? *','Olası Sonuç','Olasılık (1–5)','Şiddet (1–5)','Alınan Acil Önlem','Düzeltici Faaliyet','Sorumlu Kişi','Termin Tarihi','Fotoğraflar'],save:'Raporu Kaydet',clear:'Temizle',risk:'Risk Skoru',search:'Arama',type:'Tür',status:'Durum',all:'Tümü',view:'Görüntüle',close:'Kapat',reopen:'Yeniden Aç',noReports:'Henüz rapor yok.',noMatch:'Eşleşen rapor yok.',noActions:'Düzeltici faaliyet yok.',saved:'Rapor kaydedildi: ',types:['İş Güvenliği Gözlemi','Ucuz Atlatma','Olay','Güvensiz Davranış','Güvensiz Durum','Pozitif Gözlem','Çevre','Tehlike Bildirimi'],cats:['Yüksekte Çalışma','Kaldırma','Kapalı Alan','Kazı','Elektrik','Yangın ve Acil Durum','KKD','Düzen ve Temizlik','İskele','Alet ve Ekipman','Araç / Trafik','Çalışma İzni','Çevre','Diğer'],cons:['Hafif Yaralanma','Ciddi Yaralanma','Ölüm','Maddi Hasar','Çevresel Etki','Önemli Sonuç Yok'],risk:['Düşük','Orta','Yüksek','Çok Yüksek'],actionTitle:'Düzeltici Faaliyet Takibi',headers:['No.','Tarih','Tür','Lokasyon','Risk','Durum','İşlemler'],actionHeaders:['Rapor','Faaliyet','Sorumlu','Termin','Durum',''],detail:{title:'HSE Raporu',type:'Tür',stat:'Durum',dt:'Tarih / Saat',loc:'Lokasyon',comp:'Firma',rep:'Raporlayan',cat:'Kategori',risk:'Risk',desc:'Açıklama',imm:'Acil Önlem',corr:'Düzeltici Faaliyet',respons:'Sorumlu:',due:'Termin:',photos:'Fotoğraflar',none:'Fotoğraf eklenmemiş.'}},
+ ru:{nav:['Панель','Новый отчет','Отчеты','Действия'],dash:'Панель HSE',k:['Всего отчетов','Почти происшествия','Инциденты','Открытые действия'],recent:'Последние отчеты',newTitle:'Создать HSE отчет',notice:'Эта версия работает офлайн в браузере. Фотографии сохраняются на этом устройстве.',labels:['Тип отчета *','Дата *','Время','Проект / Площадка','Место','Компания / Подрядчик','Автор отчета','Категория *','Что было замечено / что произошло? *','Возможное последствие','Вероятность (1–5)','Тяжесть (1–5)','Принятые немедленные меры','Корректирующее действие','Ответственный','Срок','Фотографии'],save:'Сохранить отчет',clear:'Очистить',risk:'Оценка риска',search:'Поиск',type:'Тип',status:'Статус',all:'Все',view:'Просмотр',close:'Закрыть',reopen:'Открыть снова',noReports:'Отчетов пока нет.',noMatch:'Совпадений нет.',noActions:'Корректирующих действий нет.',saved:'Отчет сохранен: ',types:['Наблюдение по безопасности','Почти происшествие','Инцидент','Небезопасное действие','Небезопасное состояние','Положительное наблюдение','Экология','Сообщение об опасности'],cats:['Работа на высоте','Грузоподъемные работы','Замкнутое пространство','Земляные работы','Электрика','Пожар и аварийные ситуации','СИЗ','Порядок и уборка','Леса','Инструменты и оборудование','Транспорт','Наряд-допуск','Окружающая среда','Другое'],cons:['Легкая травма','Серьезная травма','Смертельный исход','Материальный ущерб','Воздействие на окружающую среду','Без значительных последствий'],risk:['Низкий','Средний','Высокий','Критический'],actionTitle:'Контроль корректирующих действий',headers:['№','Дата','Тип','Место','Риск','Статус','Действия'],actionHeaders:['Отчет','Действие','Ответственный','Срок','Статус',''],detail:{title:'HSE Отчет',type:'Тип',stat:'Статус',dt:'Дата / Время',loc:'Место',comp:'Компания',rep:'Автор отчета',cat:'Категория',risk:'Риск',desc:'Описание',imm:'Немедленные меры',corr:'Корректирующее действие',respons:'Ответственный:',due:'Срок:',photos:'Фотографии',none:'Фотографии не прикреплены.'}},
+ ar:{nav:['لوحة التحكم','تقرير جديد','التقارير','الإجراءات'],dash:'لوحة HSE',k:['إجمالي التقارير','شبه حادث','الحوادث','الإجراءات المفتوحة'],recent:'أحدث التقارير',newTitle:'إنشاء تقرير HSE',notice:'يمكن لهذا الإصدار العمل دون اتصال بالإنترنت. يتم حفظ الصور محلياً على هذا الجهاز.',labels:['نوع التقرير *','التاريخ *','الوقت','المشروع / الموقع','الموقع','الشركة / المقاول','معد التقرير','الفئة *','ماذا تمت ملاحظته / ماذا حدث؟ *','العواقب المحتملة','الاحتمالية (1–5)','الشدة (1–5)','الإجراء الفوري المتخذ','الإجراء التصحيحي','الشخص المسؤول','تاريخ الاستحقاق','الصور'],save:'حفظ التقرير',clear:'مسح',risk:'درجة المخاطر',search:'بحث',type:'النوع',status:'الحالة',all:'الكل',view:'عرض',close:'إغلاق',reopen:'إعادة فتح',noReports:'لا توجد تقارير بعد.',noMatch:'لا توجد نتائج مطابقة.',noActions:'لا توجد إجراءات تصحيحية.',saved:'تم حفظ التقرير: ',types:['ملاحظة سلامة','شبه حادث','حادث','سلوك غير آمن','حالة غير آمنة','ملاحظة إيجابية','بيئي','بلاغ خطر'],cats:['العمل على ارتفاع','الرفع','الأماكن المغلقة','الحفر','الكهرباء','الحريق والطوارئ','معدات الوقاية الشخصية','النظافة والترتيب','السقالات','الأدوات والمعدات','المركبات / المرور','تصريح العمل','البيئة','أخرى'],cons:['إصابة بسيطة','إصابة خطيرة','وفاة','أضرار مادية','تأثير بيئي','لا توجد عواقب مهمة'],risk:['منخفض','متوسط','مرتفع','شديد'],actionTitle:'متابعة الإجراءات التصحيحية',headers:['الرقم','التاريخ','النوع','الموقع','المخاطر','الحالة','الإجراءات'],actionHeaders:['التقرير','الإجراء','المسؤول','الاستحقاق','الحالة',''],detail:{title:'تقرير HSE',type:'النوع',stat:'الحالة',dt:'التاريخ / الوقت',loc:'الموقع',comp:'الشركة',rep:'معد التقرير',cat:'الفئة',risk:'المخاطر',desc:'الوصف',imm:'الإجراء الفوري',corr:'الإجراء التصحيحي',respons:'المسؤول:',due:'الاستحقاق:',photos:'الصور',none:'لا توجد صور مرفقة.'}}
+};
+const typesEN=['Safety Observation','Near Miss','Incident','Unsafe Act','Unsafe Condition','Positive Observation','Environmental','Hazard Report'];
+const catsEN=['Working at Height','Lifting','Confined Space','Excavation','Electrical','Fire & Emergency','PPE','Housekeeping','Scaffolding','Tools & Equipment','Vehicle / Traffic','Permit to Work','Environment','Other'];
+const consEN=['Minor Injury','Serious Injury','Fatality','Property Damage','Environmental Impact','No Significant Consequence'];
+let lang=localStorage.getItem('hse_language')||'tr';
+const tr={en:'tr',tr:'tr',ru:'ru',ar:'ar'};
+function L(){return I[lang]||I.en} function txt(v){return String(v??'')}
+function mapType(v){let i=typesEN.indexOf(v);return i<0?v:L().types[i]}
+function mapCat(v){let i=catsEN.indexOf(v);return i<0?v:L().cats[i]}
+function mapCons(v){let i=consEN.indexOf(v);return i<0?v:L().cons[i]}
+function mapRisk(v){let i=['Low','Medium','High','Extreme'].indexOf(v);return i<0?v:L().risk[i]}
+function mapStatus(v){return v==='Open'?L().openStatus||({tr:'Açık',ru:'Открыт',ar:'مفتوح',en:'Open'})[lang]:({tr:'Kapalı',ru:'Закрыт',ar:'مغلق',en:'Closed'})[lang]}
+function localizeStatic(){
+ const l=L(); document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+ document.querySelectorAll('nav button').forEach((b,i)=>b.textContent=l.nav[i]);
+ document.querySelector('#dashboard h2').textContent=l.dash;document.querySelector('#dashboard h3').textContent=l.recent;
+ document.querySelectorAll('#dashboard .muted').forEach((e,i)=>e.textContent=l.k[i]);
+ document.querySelector('#new h2').textContent=l.newTitle;document.querySelector('#new .notice').textContent=l.notice;
+ document.querySelectorAll('#reportForm label').forEach((e,i)=>{if(l.labels[i])e.textContent=l.labels[i]});
+ document.querySelector('#reportForm .primary').textContent=l.save;document.querySelector('#resetBtn').textContent=l.clear;
+ const rl=document.querySelectorAll('#reports .card label'); if(rl[0])rl[0].textContent=l.search;if(rl[1])rl[1].textContent=l.type;if(rl[2])rl[2].textContent=l.status;
+ document.querySelector('#search').placeholder=l.search+'...';
+ const sel=(id,arr)=>{const e=document.getElementById(id);if(!e)return;[...e.options].forEach((o,i)=>{if(arr[i]!=null)o.textContent=arr[i]})};
+ sel('type',l.types);sel('category',l.cats);sel('consequence',l.cons);sel('filterType',[l.all,...l.types]);sel('filterStatus',[l.all,({tr:'Açık',ru:'Открыт',ar:'مفتوح',en:'Open'})[lang],({tr:'Kapalı',ru:'Закрыт',ar:'Закрыт',en:'Closed'})[lang]]);
+ document.querySelector('#actions h2').textContent=l.actionTitle;
+ const th=[...document.querySelectorAll('#reportRows')];
+ document.querySelectorAll('#reports thead th').forEach((e,i)=>e.textContent=l.headers[i]||'');
+ document.querySelectorAll('#actions thead th').forEach((e,i)=>e.textContent=l.actionHeaders[i]||'');
+ const ph=['Project name','Area / building / unit','Company','Name','Describe the situation clearly...','Stop work, barricade, inform supervisor...','What must be done to eliminate/control the hazard?'];
+ const phs={en:ph,tr:['Proje adı','Alan / bina / ünite','Firma','İsim','Durumu açıkça açıklayın...','Çalışmayı durdur, alanı bariyerle, amiri bilgilendir...','Tehlikeyi ortadan kaldırmak/kontrol etmek için ne yapılmalı?'],ru:['Название проекта','Зона / здание / установка','Компания','Имя','Четко опишите ситуацию...','Остановить работу, оградить, сообщить руководителю...','Что необходимо сделать для устранения/контроля опасности?'],ar:['اسم المشروع','المنطقة / المبنى / الوحدة','الشركة','الاسم','صف الموقف بوضوح...','أوقف العمل، ضع حواجز، أبلغ المشرف...','ما الذي يجب فعله لإزالة/السيطرة على الخطر؟']};
+ ['project','location','company','reporter','description','immediate','corrective'].forEach((id,i)=>{let e=document.getElementById(id);if(e)e.placeholder=phs[lang][i]});
+ localizeDynamic();
+}
+function localizeDynamic(){
+ const l=L();
+ document.querySelectorAll('#recent .card').forEach(card=>{card.querySelectorAll('.badge').forEach(b=>{if(['Open','Closed','Açık','Kapalı','Открыт','Закрыт','مفتوح','مغلق'].includes(b.textContent.trim()))b.textContent=mapStatus(b.textContent.trim().match(/Open|Closed|Açık|Kapalı|Открыт|Закрыт|مفتوح|مغلق/)[0]==='Open'||b.textContent.trim()==='Açık'?'Open':'Closed'); if(b.textContent.trim().startsWith('Risk '))b.textContent='Risk '+b.textContent.trim().split(' ')[1]+' '+mapRisk(b.textContent.trim().split(' ').slice(2).join(' '))});card.querySelectorAll('button').forEach(b=>{if(['View','Görüntüle','Просмотр','عرض'].includes(b.textContent))b.textContent=l.view});});
+ document.querySelectorAll('#reportRows tr').forEach(r=>{let c=r.cells;if(!c||c.length<7)return;c[2].textContent=mapType(c[2].textContent);c[5].textContent=mapStatus(c[5].textContent.trim());c[6].querySelectorAll('button').forEach((b,i)=>b.textContent=i===0?l.view:(b.textContent.includes('Reopen')||b.textContent.includes('Yeniden')||b.textContent.includes('Открыть')||b.textContent.includes('إعادة')?l.reopen:l.close));});
+ document.querySelectorAll('#actionRows tr').forEach(r=>{let c=r.cells;if(!c||c.length<6)return;c[4].textContent=mapStatus(c[4].textContent.trim());c[5].querySelectorAll('button').forEach(b=>b.textContent=b.textContent.includes('Reopen')||b.textContent.includes('Yeniden')||b.textContent.includes('Открыть')||b.textContent.includes('إعادة')?l.reopen:l.close)});
+ const emptyRecent=document.querySelector('#recent .empty');if(emptyRecent)emptyRecent.textContent=l.noReports;const emptyRows=document.querySelector('#reportRows .empty');if(emptyRows)emptyRows.textContent=l.noMatch;const emptyAct=document.querySelector('#actionRows .empty');if(emptyAct)emptyAct.textContent=l.noActions;
+}
+function setLanguage(v){lang=I[v]?v:'en';localStorage.setItem('hse_language',lang);localizeStatic(); if(typeof riskScore==='function')riskScore(); if(typeof render==='function')render(); localizeDynamic();}
+window.setHSELanguage=setLanguage;
+window.addEventListener('load',()=>{const s=document.getElementById('languageSelect');if(s){s.value=lang;s.addEventListener('change',e=>setLanguage(e.target.value));localizeStatic();}});
+// Keep dynamic tables/cards translated whenever the original app rerenders them.
+const origAlert=window.alert; window.alert=function(msg){if(typeof msg==='string'&&msg.startsWith('Report saved: '))msg=L().saved+msg.slice(14);origAlert(msg)};
+// Localized detail window, replacing the original global function used by View buttons.
+window.viewReport=function(id){const x=reports.find(r=>r.id===id);if(!x)return;const l=L();const photos=x.photos?.map(p=>'<img src="'+p+'">').join('')||l.detail.none;const win=window.open('','_blank');win.document.write('<html lang="'+lang+'" dir="'+(lang==='ar'?'rtl':'ltr')+'"><head><title>'+x.id+'</title><style>body{font-family:Arial;max-width:900px;margin:30px auto;color:#18212b}h1{color:#102a43}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:7px}.photos img{width:180px;height:130px;object-fit:cover;margin:5px}</style></head><body><h1>'+l.detail.title+' '+x.id+'</h1><div class="grid"><div class="box"><b>'+l.detail.type+'</b><br>'+mapType(x.type)+'</div><div class="box"><b>'+l.detail.stat+'</b><br>'+mapStatus(x.status)+'</div><div class="box"><b>'+l.detail.dt+'</b><br>'+x.date+' '+(x.time||'')+'</div><div class="box"><b>'+l.detail.loc+'</b><br>'+esc(x.location)+'</div><div class="box"><b>'+l.detail.comp+'</b><br>'+esc(x.company)+'</div><div class="box"><b>'+l.detail.rep+'</b><br>'+esc(x.reporter)+'</div><div class="box"><b>'+l.detail.cat+'</b><br>'+mapCat(x.category)+'</div><div class="box"><b>'+l.detail.risk+'</b><br>'+x.risk+' — '+mapRisk(x.riskLabel)+'</div></div><div class="box"><b>'+l.detail.desc+'</b><p>'+esc(x.description)+'</p></div><div class="box"><b>'+l.detail.imm+'</b><p>'+esc(x.immediate)+'</p></div><div class="box"><b>'+l.detail.corr+'</b><p>'+esc(x.corrective)+'</p><b>'+l.detail.respons+'</b> '+esc(x.responsible)+' &nbsp; <b>'+l.detail.due+'</b> '+(x.due||'-')+'</div><h3>'+l.detail.photos+'</h3><div class="photos">'+photos+'</div><script>window.print()<\/script></body></html>');win.document.close();};
+})();
+</script>
+</body></html>
