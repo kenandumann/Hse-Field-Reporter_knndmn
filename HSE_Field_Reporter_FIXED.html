@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HSE Field Reporter</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--text:#18212b;--muted:#687482;--line:#dfe5ea;--primary:#0b5cab}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:#102a43;color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+h1{margin:0;font-size:21px}header small{opacity:.75}#languageSelect{padding:8px;border-radius:7px}
+nav{background:#fff;border-bottom:1px solid var(--line);display:flex;gap:6px;padding:8px 14px;overflow:auto}
+nav button{border:0;background:transparent;padding:10px 13px;border-radius:7px;cursor:pointer;white-space:nowrap}
+nav button.active{background:#e8f1fb;color:var(--primary);font-weight:700}
+main{max-width:1200px;margin:22px auto;padding:0 16px}.view{display:none}.view.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:15px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:17px;box-shadow:0 2px 8px #0001}
+.kpi{font-size:30px;font-weight:800;margin-top:5px}.muted{color:var(--muted);font-size:13px}
+label{display:block;font-size:13px;font-weight:700;margin:10px 0 5px}
+input,select,textarea{width:100%;padding:10px;border:1px solid #cfd7df;border-radius:7px;background:#fff;font:inherit}
+textarea{min-height:105px;resize:vertical}.primary,.secondary{border-radius:7px;padding:10px 15px;cursor:pointer}
+.primary{background:var(--primary);color:#fff;border:0;font-weight:700}.secondary{background:#fff;border:1px solid var(--line)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:9px}
+table{width:100%;border-collapse:collapse;background:#fff}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}th{background:#f8fafc}
+.badge{display:inline-block;padding:4px 8px;border-radius:99px;font-size:11px;font-weight:700;background:#edf1f4}
+.open{background:#fff3cd;color:#7a5b00}.closed{background:#dff3e3;color:#176c29}.high{background:#fde2e2;color:#a51d1d}
+.notice{padding:11px 13px;border-radius:7px;background:#eef6ff;border:1px solid #cfe4fb;margin-bottom:15px}
+.risk{font-weight:800;padding:12px;border-radius:7px;background:#eaf6ec;margin-top:8px}.risk.med{background:#fff3cd}.risk.hi{background:#fde2e2;color:#a51d1d}
+.photos{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}.photos img{width:120px;height:90px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
+.empty{text-align:center;color:var(--muted);padding:30px}
+[dir=rtl]{direction:rtl}[dir=rtl] th,[dir=rtl] td{text-align:right}
+@media(max-width:650px){header{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+<div><h1 id="appTitle">HSE FIELD REPORTER</h1><small id="appSub"></small></div>
+<div><select id="languageSelect"><option value="en">🇬🇧 English</option><option value="tr">🇹🇷 Türkçe</option><option value="ru">🇷🇺 Русский</option><option value="ar">🇸🇦 العربية</option></select></div>
+</header>
+<nav>
+<button class="active" data-view="dashboard"></button><button data-view="new"></button><button data-view="reports"></button><button data-view="actions"></button>
+</nav>
+<main>
+<section id="dashboard" class="view active">
+<h2 id="dashTitle"></h2><div class="grid">
+<div class="card"><div class="muted" id="k0"></div><div class="kpi" id="kTotal">0</div></div>
+<div class="card"><div class="muted" id="k1"></div><div class="kpi" id="kNear">0</div></div>
+<div class="card"><div class="muted" id="k2"></div><div class="kpi" id="kInc">0</div></div>
+<div class="card"><div class="muted" id="k3"></div><div class="kpi" id="kOpen">0</div></div>
+</div><h3 id="recentTitle"></h3><div id="recent"></div>
+</section>
+
+<section id="new" class="view">
+<h2 id="newTitle"></h2><div class="notice" id="notice"></div>
+<form id="reportForm" class="card">
+<div class="grid">
+<div><label id="l_type"></label><select id="type" required></select></div>
+<div><label id="l_date"></label><input id="date" type="date" required></div>
+<div><label id="l_time"></label><input id="time" type="time"></div>
+<div><label id="l_project"></label><input id="project"></div>
+<div><label id="l_location"></label><input id="location"></div>
+<div><label id="l_company"></label><input id="company"></div>
+<div><label id="l_reporter"></label><input id="reporter"></div>
+<div><label id="l_category"></label><select id="category" required></select></div>
+</div>
+<label id="l_observed"></label><textarea id="description" required></textarea>
+<div class="grid">
+<div><label id="l_consequence"></label><select id="consequence"></select></div>
+<div><label id="l_likelihood"></label><select id="likelihood"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div><label id="l_severity"></label><select id="severity"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div><label id="l_immediate"></label><input id="immediate"></div>
+</div>
+<div id="riskBox" class="risk"></div>
+<label id="l_corrective"></label><textarea id="corrective"></textarea>
+<div class="grid">
+<div><label id="l_responsible"></label><input id="responsible"></div>
+<div><label id="l_due"></label><input id="due" type="date"></div>
+</div>
+<label id="l_photos"></label><input id="photos" type="file" accept="image/*" multiple><div id="photoPreview" class="photos"></div>
+<div class="actions"><button class="primary" type="submit" id="saveBtn"></button><button class="secondary" type="reset" id="resetBtn"></button></div>
+</form>
+</section>
+
+<section id="reports" class="view">
+<h2 id="reportsTitle"></h2><div class="card"><div class="grid">
+<div><label id="searchLabel"></label><input id="search"></div>
+<div><label id="typeFilterLabel"></label><select id="filterType"></select></div>
+<div><label id="statusLabel"></label><select id="filterStatus"></select></div>
+</div></div>
+<div class="table-wrap" style="margin-top:15px"><table><thead><tr id="reportHead"></tr></thead><tbody id="reportRows"></tbody></table></div>
+</section>
+
+<section id="actions" class="view">
+<h2 id="actionsTitle"></h2><div class="table-wrap"><table><thead><tr id="actionHead"></tr></thead><tbody id="actionRows"></tbody></table></div>
+</section>
+</main>
+
+<script>
+const KEY="kenan_hse_reports_v2";
+let reports=JSON.parse(localStorage.getItem(KEY)||"[]");
+let photos=[];
+let lang=localStorage.getItem("hse_language")||"en";
+const $=id=>document.getElementById(id);
+const today=new Date().toISOString().slice(0,10);
+$("date").value=today;
+
+const D={
+en:{title:"HSE FIELD REPORTER",sub:"Observation • Near Miss • Incident • Action Tracking",nav:["Dashboard","New Report","Reports","Actions"],dash:"HSE Dashboard",k:["Total Reports","Near Miss","Incidents","Open Actions"],recent:"Recent Reports",create:"Create HSE Report",notice:"This version works offline in your browser. Photos are stored locally on this device.",labels:["Report Type *","Date *","Time","Project / Site","Location","Company / Contractor","Reporter","Category *","What was observed / what happened? *","Potential Consequence","Likelihood (1–5)","Severity (1–5)","Immediate Action Taken","Corrective Action","Responsible Person","Due Date","Photos"],save:"Save Report",clear:"Clear",search:"Search",type:"Type",status:"Status",all:"All",view:"View",close:"Close",reopen:"Reopen",no:"No matching reports.",none:"No reports yet.",actions:"Corrective Action Tracking",noActions:"No corrective actions.",risk:"Risk Score",open:"Open",closed:"Closed",saved:"Report saved: ",types:["Safety Observation","Near Miss","Incident","Unsafe Act","Unsafe Condition","Positive Observation","Environmental","Hazard Report"],cats:["Working at Height","Lifting","Confined Space","Excavation","Electrical","Fire & Emergency","PPE","Housekeeping","Scaffolding","Tools & Equipment","Vehicle / Traffic","Permit to Work","Environment","Other"],cons:["Minor Injury","Serious Injury","Fatality","Property Damage","Environmental Impact","No Significant Consequence"],riskNames:["Low","Medium","High","Extreme"],head:["No.","Date","Type","Location","Risk","Status","Actions"],ahead:["Report","Action","Responsible","Due","Status",""]},
+tr:{title:"HSE SAHA RAPORLAMA",sub:"Gözlem • Ucuz Atlatma • Olay • Aksiyon Takibi",nav:["Ana Sayfa","Yeni Rapor","Raporlar","Aksiyonlar"],dash:"HSE Dashboard",k:["Toplam Rapor","Ucuz Atlatma","Olaylar","Açık Aksiyonlar"],recent:"Son Raporlar",create:"HSE Raporu Oluştur",notice:"Bu sürüm tarayıcınızda çevrimdışı çalışır. Fotoğraflar bu cihazda yerel olarak saklanır.",labels:["Rapor Türü *","Tarih *","Saat","Proje / Saha","Lokasyon","Şirket / Yüklenici","Raporlayan","Kategori *","Ne gözlemlendi / ne oldu? *","Olası Sonuç","Olasılık (1–5)","Şiddet (1–5)","Alınan Acil Önlem","Düzeltici Faaliyet","Sorumlu Kişi","Termin Tarihi","Fotoğraflar"],save:"Raporu Kaydet",clear:"Temizle",search:"Arama",type:"Tür",status:"Durum",all:"Tümü",view:"Görüntüle",close:"Kapat",reopen:"Yeniden Aç",no:"Eşleşen rapor yok.",none:"Henüz rapor yok.",actions:"Düzeltici Faaliyet Takibi",noActions:"Düzeltici faaliyet yok.",risk:"Risk Skoru",open:"Açık",closed:"Kapalı",saved:"Rapor kaydedildi: ",types:["İş Güvenliği Gözlemi","Ucuz Atlatma","Olay","Güvensiz Davranış","Güvensiz Durum","Pozitif Gözlem","Çevre","Tehlike Bildirimi"],cats:["Yüksekte Çalışma","Kaldırma","Kapalı Alan","Kazı","Elektrik","Yangın ve Acil Durum","KKD","Düzen ve Temizlik","İskele","Alet ve Ekipman","Araç / Trafik","Çalışma İzni","Çevre","Diğer"],cons:["Hafif Yaralanma","Ciddi Yaralanma","Ölüm","Maddi Hasar","Çevresel Etki","Önemli Sonuç Yok"],riskNames:["Düşük","Orta","Yüksek","Çok Yüksek"],head:["No.","Tarih","Tür","Lokasyon","Risk","Durum","İşlemler"],ahead:["Rapor","Faaliyet","Sorumlu","Termin","Durum",""]},
+ru:{title:"HSE ПОЛЕВОЙ ОТЧЕТ",sub:"Наблюдение • Почти происшествие • Инцидент • Контроль действий",nav:["Панель","Новый отчет","Отчеты","Действия"],dash:"Панель HSE",k:["Всего отчетов","Почти происшествие","Инциденты","Открытые действия"],recent:"Последние отчеты",create:"Создать HSE отчет",notice:"Эта версия работает офлайн. Фотографии хранятся локально на устройстве.",labels:["Тип отчета *","Дата *","Время","Проект / Площадка","Место","Компания / Подрядчик","Автор","Категория *","Что наблюдалось / что произошло? *","Возможное последствие","Вероятность (1–5)","Тяжесть (1–5)","Немедленные меры","Корректирующее действие","Ответственный","Срок","Фотографии"],save:"Сохранить отчет",clear:"Очистить",search:"Поиск",type:"Тип",status:"Статус",all:"Все",view:"Просмотр",close:"Закрыть",reopen:"Открыть снова",no:"Совпадений нет.",none:"Отчетов пока нет.",actions:"Контроль корректирующих действий",noActions:"Корректирующих действий нет.",risk:"Оценка риска",open:"Открыт",closed:"Закрыт",saved:"Отчет сохранен: ",types:["Наблюдение по безопасности","Почти происшествие","Инцидент","Небезопасное действие","Небезопасное состояние","Положительное наблюдение","Экология","Сообщение об опасности"],cats:["Работа на высоте","Грузоподъемные работы","Замкнутое пространство","Земляные работы","Электрика","Пожар и аварийные ситуации","СИЗ","Порядок и уборка","Леса","Инструменты и оборудование","Транспорт","Наряд-допуск","Окружающая среда","Другое"],cons:["Легкая травма","Серьезная травма","Смертельный исход","Материальный ущерб","Воздействие на окружающую среду","Без значительных последствий"],riskNames:["Низкий","Средний","Высокий","Критический"],head:["№","Дата","Тип","Место","Риск","Статус","Действия"],ahead:["Отчет","Действие","Ответственный","Срок","Статус",""]},
+ar:{title:"تقرير السلامة والصحة والبيئة",sub:"ملاحظة • شبه حادث • حادث • متابعة الإجراءات",nav:["لوحة التحكم","تقرير جديد","التقارير","الإجراءات"],dash:"لوحة HSE",k:["إجمالي التقارير","شبه حادث","الحوادث","الإجراءات المفتوحة"],recent:"أحدث التقارير",create:"إنشاء تقرير HSE",notice:"يمكن لهذا الإصدار العمل دون اتصال. يتم حفظ الصور محلياً على هذا الجهاز.",labels:["نوع التقرير *","التاريخ *","الوقت","المشروع / الموقع","الموقع","الشركة / المقاول","معد التقرير","الفئة *","ماذا تمت ملاحظته / ماذا حدث؟ *","العواقب المحتملة","الاحتمالية (1–5)","الشدة (1–5)","الإجراء الفوري","الإجراء التصحيحي","الشخص المسؤول","تاريخ الاستحقاق","الصور"],save:"حفظ التقرير",clear:"مسح",search:"بحث",type:"النوع",status:"الحالة",all:"الكل",view:"عرض",close:"إغلاق",reopen:"إعادة فتح",no:"لا توجد نتائج مطابقة.",none:"لا توجد تقارير بعد.",actions:"متابعة الإجراءات التصحيحية",noActions:"لا توجد إجراءات تصحيحية.",risk:"درجة المخاطر",open:"مفتوح",closed:"مغلق",saved:"تم حفظ التقرير: ",types:["ملاحظة سلامة","شبه حادث","حادث","سلوك غير آمن","حالة غير آمنة","ملاحظة إيجابية","بيئي","بلاغ خطر"],cats:["العمل على ارتفاع","الرفع","الأماكن المغلقة","الحفر","الكهرباء","الحريق والطوارئ","معدات الوقاية الشخصية","النظافة والترتيب","السقالات","الأدوات والمعدات","المركبات / المرور","تصريح العمل","البيئة","أخرى"],cons:["إصابة بسيطة","إصابة خطيرة","وفاة","أضرار مادية","تأثير بيئي","لا توجد عواقب مهمة"],riskNames:["منخفض","متوسط","مرتفع","شديد"],head:["الرقم","التاريخ","النوع","الموقع","المخاطر","الحالة","الإجراءات"],ahead:["التقرير","الإجراء","المسؤول","الاستحقاق","الحالة",""]}}
+const baseTypes=D.en.types,baseCats=D.en.cats,baseCons=D.en.cons;
+const T=()=>D[lang]||D.en;
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const trVal=(arr,v)=>{let i=arr.indexOf(v);return i>=0?T()[arr===baseTypes?"types":arr===baseCats?"cats":"cons"][i]:v};
+const riskName=v=>{let i=["Low","Medium","High","Extreme"].indexOf(v);return i<0?v:T().riskNames[i]};
+const statusName=v=>v==="Open"?T().open:T().closed;
+function fill(id,arr,all=false){$(id).innerHTML=(all?'<option value="">'+T().all+"</option>":"")+arr.map((x,i)=>'<option value="'+i+'">'+esc(x)+"</option>").join("")}
+function riskScore(){let n=+$("likelihood").value*+$("severity").value,l=n>=15?"Extreme":n>=10?"High":n>=5?"Medium":"Low";$("riskBox").textContent=T().risk+": "+n+" — "+riskName(l);$("riskBox").className="risk "+(l==="High"||l==="Extreme"?"hi":l==="Medium"?"med":"");return{score:n,label:l}}
+function localize(){
+let t=T();document.documentElement.lang=lang;document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+$("appTitle").textContent=t.title;$("appSub").textContent=t.sub;
+document.querySelectorAll("nav button").forEach((b,i)=>b.textContent=t.nav[i]);
+$("dashTitle").textContent=t.dash;$("recentTitle").textContent=t.recent;$("newTitle").textContent=t.create;$("notice").textContent=t.notice;$("reportsTitle").textContent=t.nav[2];$("actionsTitle").textContent=t.actions;
+t.k.forEach((x,i)=>$("k"+i).textContent=x);t.labels.forEach((x,i)=>$("l_"+["type","date","time","project","location","company","reporter","category","observed","consequence","likelihood","severity","immediate","corrective","responsible","due","photos"][i]).textContent=x);
+$("saveBtn").textContent=t.save;$("resetBtn").textContent=t.clear;$("searchLabel").textContent=t.search;$("typeFilterLabel").textContent=t.type;$("statusLabel").textContent=t.status;
+fill("type",t.types);fill("category",t.cats);fill("consequence",t.cons);fill("filterType",t.types,true);fill("filterStatus",[t.open,t.closed],true);
+$("reportHead").innerHTML=t.head.map(x=>"<th>"+x+"</th>").join("");$("actionHead").innerHTML=t.ahead.map(x=>"<th>"+x+"</th>").join("");render();riskScore()
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(reports))}
+function showView(id){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));$(id).classList.add("active");render()}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>showView(b.dataset.view));
+$("likelihood").onchange=$("severity").onchange=riskScore;
+$("photos").onchange=e=>{photos=[];$("photoPreview").innerHTML="";[...e.target.files].forEach(f=>{let r=new FileReader();r.onload=x=>{photos.push(x.target.result);let im=document.createElement("img");im.src=x.target.result;$("photoPreview").appendChild(im)};r.readAsDataURL(f)})};
+$("reportForm").onsubmit=e=>{e.preventDefault();let r=riskScore(),id="HSE-"+new Date().getFullYear()+"-"+String(reports.length+1).padStart(5,"0");reports.unshift({id,type:baseTypes[$("type").value],date:$("date").value,time:$("time").value,project:$("project").value,location:$("location").value,company:$("company").value,reporter:$("reporter").value,category:baseCats[$("category").value],description:$("description").value,consequence:baseCons[$("consequence").value],likelihood:+$("likelihood").value,severity:+$("severity").value,risk:r.score,riskLabel:r.label,immediate:$("immediate").value,corrective:$("corrective").value,responsible:$("responsible").value,due:$("due").value,status:"Open",photos});save();e.target.reset();$("date").value=today;photos=[];$("photoPreview").innerHTML="";alert(T().saved+id);showView("reports")};
+$("resetBtn").onclick=()=>setTimeout(()=>{$("date").value=today;photos=[];$("photoPreview").innerHTML="";riskScore()},0);
+["search","filterType","filterStatus"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",render));
+function render(){
+$("kTotal").textContent=reports.length;$("kNear").textContent=reports.filter(x=>x.type==="Near Miss").length;$("kInc").textContent=reports.filter(x=>x.type==="Incident").length;$("kOpen").textContent=reports.filter(x=>x.status==="Open").length;
+$("recent").innerHTML=reports.slice(0,5).map(x=>'<div class="card" style="margin-bottom:9px"><b>'+esc(x.id)+"</b> — "+esc(trVal(baseTypes,x.type))+'<div class="muted">'+esc(x.date)+" • "+esc(x.location||"-")+" • "+esc(trVal(baseCats,x.category))+"</div><p>"+esc(x.description).slice(0,220)+'</p><span class="badge '+x.status.toLowerCase()+'">'+statusName(x.status)+"</span> <span class=\"badge "+(x.risk>=10?"high":"")+"\">"+T().risk+" "+x.risk+" "+riskName(x.riskLabel)+'</span> <button class="secondary" onclick="viewReport(\''+x.id+"')\">"+T().view+"</button></div>").join("")||'<div class="card empty">'+T().none+"</div>";
+let q=$("search").value.toLowerCase(),ft=$("filterType").value,fs=$("filterStatus").value;
+let list=reports.filter(x=>(!q||JSON.stringify(x).toLowerCase().includes(q))&&(!ft||baseTypes.indexOf(x.type)==ft)&&(!fs||(fs==="0"?x.status==="Open":x.status==="Closed")));
+$("reportRows").innerHTML=list.map(x=>"<tr><td><b>"+esc(x.id)+"</b></td><td>"+esc(x.date)+"</td><td>"+esc(trVal(baseTypes,x.type))+"</td><td>"+esc(x.location||"-")+"</td><td><span class=\"badge "+(x.risk>=10?"high":"")+"\">"+x.risk+" "+riskName(x.riskLabel)+"</span></td><td><span class=\"badge "+x.status.toLowerCase()+"\">"+statusName(x.status)+"</span></td><td><button class=\"secondary\" onclick=\"viewReport('"+x.id+"')\">"+T().view+"</button> <button class=\"secondary\" onclick=\"toggleStatus('"+x.id+"')\">"+(x.status==="Open"?T().close:T().reopen)+"</button></td></tr>").join("")||'<tr><td colspan="7" class="empty">'+T().no+"</td></tr>";
+let acts=reports.filter(x=>x.corrective);$("actionRows").innerHTML=acts.map(x=>"<tr><td>"+esc(x.id)+"</td><td>"+esc(x.corrective)+"</td><td>"+esc(x.responsible||"-")+"</td><td>"+esc(x.due||"-")+"</td><td><span class=\"badge "+x.status.toLowerCase()+"\">"+statusName(x.status)+"</span></td><td><button class=\"secondary\" onclick=\"toggleStatus('"+x.id+"')\">"+(x.status==="Open"?T().close:T().reopen)+"</button></td></tr>").join("")||'<tr><td colspan="6" class="empty">'+T().noActions+"</td></tr>"
+}
+function toggleStatus(id){let x=reports.find(r=>r.id===id);if(x){x.status=x.status==="Open"?"Closed":"Open";save();render()}}
+function viewReport(id){
+let x=reports.find(r=>r.id===id);if(!x)return;let w=window.open("","_blank");if(!w){alert("Allow pop-ups for this site.");return}
+let imgs=x.photos?.map(p=>'<img src="'+p+'">').join("")||"No photos";w.document.write('<!doctype html><html lang="'+lang+'" dir="'+(lang==="ar"?"rtl":"ltr")+'"><head><meta charset="utf-8"><title>'+esc(x.id)+'</title><style>body{font-family:Arial;max-width:900px;margin:30px auto;padding:10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.box{border:1px solid #ddd;padding:12px;margin:8px 0;border-radius:7px}.photos img{width:180px;height:130px;object-fit:cover;margin:5px}</style></head><body><h1>'+T().title+" — "+esc(x.id)+'</h1><div class="grid"><div class="box"><b>'+T().type+'</b><br>'+esc(trVal(baseTypes,x.type))+'</div><div class="box"><b>'+T().status+'</b><br>'+statusName(x.status)+'</div><div class="box"><b>'+T().labels[1]+'</b><br>'+esc(x.date)+" "+esc(x.time||"")+'</div><div class="box"><b>'+T().labels[4]+'</b><br>'+esc(x.location)+'</div><div class="box"><b>'+T().labels[5]+'</b><br>'+esc(x.company)+'</div><div class="box"><b>'+T().labels[6]+'</b><br>'+esc(x.reporter)+'</div><div class="box"><b>'+T().labels[7]+'</b><br>'+esc(trVal(baseCats,x.category))+'</div><div class="box"><b>'+T().risk+'</b><br>'+x.risk+" — "+riskName(x.riskLabel)+'</div></div><div class="box"><b>'+T().labels[8]+'</b><p>'+esc(x.description)+'</p></div><div class="box"><b>'+T().labels[12]+'</b><p>'+esc(x.immediate)+'</p></div><div class="box"><b>'+T().labels[13]+'</b><p>'+esc(x.corrective)+'</p><b>'+T().labels[14]+":</b> "+esc(x.responsible)+" &nbsp; <b>"+T().labels[15]+":</b> "+esc(x.due||"-")+'</div><h3>'+T().labels[16]+'</h3><div class="photos">'+imgs+'</div><script>window.onload=function(){window.print()}<\/script></body></html>');w.document.close()
+}
+$("languageSelect").value=lang;$("languageSelect").onchange=e=>{lang=e.target.value;localStorage.setItem("hse_language",lang);localize()};localize();
+</script>
+</body></html>
