@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#102a43">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="HSE Field Reporter">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <title>HSE Field Reporter</title>
 <style>
 :root{--bg:#f4f6f8;--card:#fff;--text:#18212b;--muted:#687482;--line:#dfe5ea;--primary:#0b5cab;--danger:#c62828;--warn:#d98b00;--ok:#218739}
@@ -172,7 +179,14 @@ function viewReport(id){
  const x=reports.find(r=>r.id===id); if(!x)return;
  const photos=x.photos?.map(p=>`<img src="${p}">`).join('')||'';
  const win=window.open('','_blank');
- win.document.write(`<html><head><title>${x.id}</title><style>body{font-family:Arial;max-width:900px;margin:30px auto;color:#18212b}h1{color:#102a43}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:7px}.photos img{width:180px;height:130px;object-fit:cover;margin:5px}</style></head><body><h1>HSE Report ${x.id}</h1><div class="grid"><div class="box"><b>Type</b><br>${x.type}</div><div class="box"><b>Status</b><br>${x.status}</div><div class="box"><b>Date / Time</b><br>${x.date} ${x.time||''}</div><div class="box"><b>Location</b><br>${esc(x.location)}</div><div class="box"><b>Company</b><br>${esc(x.company)}</div><div class="box"><b>Reporter</b><br>${esc(x.reporter)}</div><div class="box"><b>Category</b><br>${x.category}</div><div class="box"><b>Risk</b><br>${x.risk} — ${x.riskLabel}</div></div><div class="box"><b>Description</b><p>${esc(x.description)}</p></div><div class="box"><b>Immediate Action</b><p>${esc(x.immediate)}</p></div><div class="box"><b>Corrective Action</b><p>${esc(x.corrective)}</p><b>Responsible:</b> ${esc(x.responsible)} &nbsp; <b>Due:</b> ${x.due||'-'}</div><h3>Photos</h3><div class="photos">${photos||'No photos attached.'}</div><script>window.print()<\/script></body></html>`);
+ win.document.write(`<html><head><title>${x.id}</title><style>body{font-family:Arial;max-width:900px;margin:30px auto;color:#18212b}h1{color:#102a43}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.box{border:1px solid #ddd;padding:12px;margin:10px 0;border-radius:7px}.photos img{width:180px;height:130px;object-fit:cover;margin:5px}</style></head><body><h1>HSE Report ${x.id}</h1><div class="grid"><div class="box"><b>Type</b><br>${x.type}</div><div class="box"><b>Status</b><br>${x.status}</div><div class="box"><b>Date / Time</b><br>${x.date} ${x.time||''}</div><div class="box"><b>Location</b><br>${esc(x.location)}</div><div class="box"><b>Company</b><br>${esc(x.company)}</div><div class="box"><b>Reporter</b><br>${esc(x.reporter)}</div><div class="box"><b>Category</b><br>${x.category}</div><div class="box"><b>Risk</b><br>${x.risk} — ${x.riskLabel}</div></div><div class="box"><b>Description</b><p>${esc(x.description)}</p></div><div class="box"><b>Immediate Action</b><p>${esc(x.immediate)}</p></div><div class="box"><b>Corrective Action</b><p>${esc(x.corrective)}</p><b>Responsible:</b> ${esc(x.responsible)} &nbsp; <b>Due:</b> ${x.due||'-'}</div><h3>Photos</h3><div class="photos">${photos||'No photos attached.'}</div><script>window.print()<\/script><script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./service-worker.js").catch(function(){});
+  });
+}
+</script>
+</body></html>`);
  win.document.close();
 }
 function toggleStatus(id){const x=reports.find(r=>r.id===id);if(x){x.status=x.status==='Open'?'Closed':'Open';save();render()}}
